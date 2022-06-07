@@ -1,33 +1,48 @@
-import React, {SyntheticEvent, useState} from 'react';
-import {Navigate} from 'react-router-dom'
+import React, { SyntheticEvent, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import axios from 'axios';
 
-const Login = (props: {setName: (name: string) => void}) => {
+const Login = (props: { setName: (name: string) => void }) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('')
-  const [redirect, setRedirect] = useState(false)
+  const [password, setPassword] = useState('');
+  // const [redirect, setRedirect] = useState(false)
+  const [navigate, setNavigate] = useState(false);
 
   const submit = async (e: SyntheticEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const response = await fetch('http://localhost:8000/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        
+    // const response = await fetch('http://localhost:8000/api/login', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   credentials: 'include',
+    //   body: JSON.stringify({
+    //     email,
+    //     password,
+    //   }),
+    // });
+
+    const { data } = await axios.post(
+      'http://localhost:8000/api/login',
+      {
         email,
-        password
-      }),
-    });
-    
-    const content = await response.json()
+        password,
+      },
+      {
+        withCredentials: true,
+      }
+    );
 
-    props.setName(content.name)
-    setRedirect(true)
-  }
+    axios.defaults.headers.common['Authorization'] = `Bearer ${data['token']}`;
+    // setRedirect(true);
+    setNavigate(true);
+  };
 
-  if (redirect) {
-    return <Navigate to="/" />
+  // if (redirect) {
+  //   return <Navigate to="/" />;
+  // }
+
+  if (navigate) {
+    return <Navigate to="/" />;
   }
 
   return (
@@ -39,7 +54,7 @@ const Login = (props: {setName: (name: string) => void}) => {
         className="form-control"
         placeholder="Email address"
         required
-        onChange={e => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
       />
 
       <input
@@ -47,7 +62,7 @@ const Login = (props: {setName: (name: string) => void}) => {
         className="form-control"
         placeholder="Password"
         required
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
       />
 
       <button className="w-100 btn btn-lg btn-primary" type="submit">
